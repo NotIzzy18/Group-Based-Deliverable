@@ -21,7 +21,7 @@ def move(servo:PWM,deg:int) -> None:
     servo.duty_u16(translate(deg))
     return
 
-def readpotentiometers() -> list:
+def read_potentiometers() -> list:
     '''Return the positions of the left and right potentiometers.'''
     return [0,1]
 
@@ -30,13 +30,13 @@ def calc(target:list) -> list:
     # Inverse kinematics to be done here
     return [0,1]
 
-def toggle() -> None:
+def toggle_wrist() -> None:
     '''Toggle the wrist.'''
     return
 
 target=None # Init so the if doesn't throw an error before calc() is used
 while True:
-    if not target==readpotentiometers(): # Act only if there's been a change since last reading
-        reqangles=calc(readpotentiometers()) # Potentiometer positions list is taken to form the coordinates of the target
+    if not target==read_potentiometers(): # Act only if there's been a change since last reading
+        reqangles=calc(read_potentiometers()) # Potentiometer positions list is taken to form the coordinates of the target
         move(S1,reqangles[0]) # Move the first servo to it's target
         move(S2,reqangles[1])
