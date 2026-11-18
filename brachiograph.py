@@ -1,5 +1,5 @@
 from machine import Pin,PWM,ADC
-from time import sleep as wait
+import math
 
 # Hardware constants
 S1=PWM(Pin(0)) # Shoulder
@@ -25,7 +25,7 @@ def gettarget() -> list:
     '''Turn the potentiometers' positions into useable xy coordinartes by filtering out noise.'''
     raw=[ADC(Pin(27)),ADC(Pin(26))] # [left,right]
     # TODO: Filter out noise: min is 384, max is 65535
-    return
+    return raw
 
 def calc(target:list) -> list:
     '''Calculate the servo angles required the reach the target (arg1).'''
@@ -33,8 +33,8 @@ def calc(target:list) -> list:
     La = 155 # length from shoulder to elblow = 155 mm
     Lb = 155 # length from elbow to wrist = 155 mm
     
-    end_position_x = float(end_position_x)
-    end_position_y = float(end_position_y)
+    end_position_x = float(target[0])
+    end_position_y = float(target[1])
     
     print(end_position_x)
     print(end_position_y)
@@ -53,7 +53,7 @@ def calc(target:list) -> list:
     
     resulting_angles = [alpha, beta]
     
-    return (resulting_angles)
+    return resulting_angles
 
 def toggle_wrist() -> None:
     '''Toggle the wrist.'''
