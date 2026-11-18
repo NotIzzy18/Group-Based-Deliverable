@@ -30,7 +30,30 @@ def gettarget() -> list:
 def calc(target:list) -> list:
     '''Calculate the servo angles required the reach the target (arg1).'''
     # Inverse kinematics to be done here
-    return [0,1]
+    La = 155 # length from shoulder to elblow = 155 mm
+    Lb = 155 # length from elbow to wrist = 155 mm
+    
+    end_position_x = float(end_position_x)
+    end_position_y = float(end_position_y)
+    
+    print(end_position_x)
+    print(end_position_y)
+    
+    shoulder_position = [-50.0, 139.5] # coordinates of shoulder position if origin is bottom left corner of page
+    
+    end_position = math.sqrt(((shoulder_position[0] - end_position_x)**2.0) + (shoulder_position[1] - end_position_y)**2.0)
+    xaxis_end_position = math.sqrt(((shoulder_position[0] - end_position_x)**2.0) + (end_position_y)**2.0)
+    
+    angle_bac = math.acos(((La)**2 + (end_position)**2 - (Lb)**2)/(2*La*end_position)) # b = elbow; a = shoulder; c = wrist
+    angle_acb = math.asin(((La)*(math.sin(angle_bac)))/(Lb)) # b = elbow; a = shoulder; c = wrist
+    angle_yac = math.acos(((shoulder_position[1])**2 + (end_position)**2 - (xaxis_end_position)**2)/(2*(shoulder_position[1])*(end_position))) # y = y-axis (vertical); a = shoulder; c = wrist
+    
+    alpha = math.degrees(angle_bac) + math.degrees(angle_yac) # alpha = servo position of shoulder
+    beta = math.degrees(angle_bac) + math.degrees(angle_acb) # beta = servo position of elbow
+    
+    resulting_angles = [alpha, beta]
+    
+    return (resulting_angles)
 
 def toggle_wrist() -> None:
     '''Toggle the wrist.'''
