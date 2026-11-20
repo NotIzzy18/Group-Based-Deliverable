@@ -52,9 +52,7 @@ def calc(target:list) -> list:
     alpha = math.degrees(angle_bac) + math.degrees(angle_yac) # alpha = servo position of shoulder
     beta = math.degrees(angle_bac) + math.degrees(angle_acb) # beta = servo position of elbow
     
-    resulting_angles = [alpha, beta]
-    
-    return resulting_angles
+    return [alpha,beta] # The required angles
 
 def toggle_wrist() -> None:
     '''Toggle the wrist.'''
