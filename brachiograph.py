@@ -5,8 +5,9 @@ import math
 S1=PWM(Pin(0)) # Shoulder
 S2=PWM(Pin(1)) # Elbow
 S3=PWM(Pin(2)) # Wrist
-B1=None # Up/down toggle
-B2=None # Shutdown
+B1=Pin(22) # Up/down toggle
+B2=Pin(13) # Reset to 0,0
+B3=Pin(12) # Shutdown
 
 def translate(angle:float) -> int:
     '''Translate an angle to the duty factor required to assume it.'''
