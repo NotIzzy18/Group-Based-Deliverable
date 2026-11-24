@@ -5,9 +5,16 @@ import math
 S1=PWM(Pin(0)) # Shoulder
 S2=PWM(Pin(1)) # Elbow
 S3=PWM(Pin(2)) # Wrist
-B1=Pin(22) # Up/down toggle
+S3.freq(50)    # Servos need 50 Hz
+B1=Pin(22,Pin.IN,Pin.PULL_UP) # Up/down toggle (GP22, same as already pushed)
 B2=Pin(13) # Reset to 0,0
 B3=Pin(12) # Shutdown
+WRIST_UP=30   # degrees (confirmed by testing on our jig)
+WRIST_DOWN=0  # degrees
+
+wrist_flag=False # Set by the button, handled in the main loop
+last_press=0     # For debounce
+
 
 def translate(angle:float) -> int:
     '''Translate an angle to the duty factor required to assume it.'''
@@ -56,14 +63,37 @@ def calc(target:list) -> list:
 
 def toggle_wrist() -> None:
     '''Toggle the wrist.'''
-    # TODO: - Query the wrist servo
-    #       - If up (30deg), move down (0deg), and vice versa
+    duty=S3.duty_u16()
+    if abs(duty-translate(WRIST_UP))<abs(duty-translate(WRIST_DOWN)):
+        move(S3,WRIST_DOWN) # If up, move down
+    else:
+        move(S3,WRIST_UP)   # If down, move up
     return
 
+# Button handler (below toggle_wrist)
+def b1_pressed(pin) -> None:
+    '''Interrupt handler for B1. Only sets a flag: no servo moves inside an interrupt.'''
+    global wrist_flag,last_press
+    now=time.ticks_ms()
+    if time.ticks_diff(now,last_press)>200: # Ignore bounces within 200 ms
+        last_press=now
+        wrist_flag=True
+    return
+
+B1.irq(trigger=Pin.IRQ_FALLING,handler=b1_pressed)
+
+#  Start with the pen UP so it doesn't mark the page (before the while True loop)
+move(S3,WRIST_UP)
+
+
 target=None # Init so the if doesn't throw an error before calc() is used
+# if wrist_flag:
+#  wrist_flag=False
+# toggle_Wrist()
 while True:
     if not target==gettarget(): # Act only if there's been a change since last reading
         target=gettarget() # Potentiometer positions list is taken to form the coordinates of the target
         reqangles=calc(target)
         move(S1,reqangles[0]) # Move the first servo to its target
         move(S2,reqangles[1])
+   
