@@ -89,13 +89,13 @@ def shutdown() -> None:
 while True:
     target=gettarget() # Potentiometer positions list is taken to form the coordinates of the target
     if int(B1.value())==1:
-        log+=f"\n{gettime()}: Toggle signal detected"
+        log+=f"\nToggle signal detected"
         toggle_wrist()
     elif int(B2.value())==1:
-        log+=f"\n{gettime()}: Reset signal detected"
+        log+=f"\nReset signal detected"
         reset()
     elif int(B3.value())==1:
-        log+=f"\n{gettime()}: Shutdown signal detected"
+        log+=f"\nShutdown signal detected"
         shutdown()
     reqangles=calc(target)
     move(S1,reqangles[0]) # Move the first servo to its target
