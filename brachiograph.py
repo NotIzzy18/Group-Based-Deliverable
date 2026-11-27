@@ -1,5 +1,6 @@
 from machine import Pin,PWM,ADC
 import math
+from time import sleep
 
 # Hardware constants
 S1=PWM(Pin(0)) # Shoulder
@@ -8,6 +9,9 @@ S3=PWM(Pin(2)) # Wrist
 B1=Pin(22) # Up/down toggle
 B2=Pin(13) # Reset to 0,0
 B3=Pin(12) # Shutdown
+
+wristup=180 # Wrist constants
+wristdown=70
 
 def translate(angle:float) -> int:
     '''Translate an angle to the duty factor required to assume it.'''
@@ -54,16 +58,44 @@ def calc(target:list) -> list:
     
     return [alpha,beta] # The required angles
 
+move(S3,wristup)
 def toggle_wrist() -> None:
-    '''Toggle the wrist.'''
-    # TODO: - Query the wrist servo
-    #       - If up (30deg), move down (0deg), and vice versa
+    '''Toggle the wrist (servo 3).'''
+    duty=S3.duty_u16()
+    if abs(duty-translate(wristup))<abs(duty-translate(wristdown)):
+        move(S3,wristdown) # If up, move down
+    else:
+        move(S3,wristup)   # If down, move up
+    sleep(0.2)
     return
 
-target=None # Init so the if doesn't throw an error before calc() is used
+def reset() -> None:
+    '''Reset arm to 0,0.'''
+    move(S2,0)
+    move(S1,0)
+    sleep(0.2)
+    return
+
+def shutdown() -> None:
+    '''Reset, deinit PWMs and exit.'''
+    reset()
+    print("Shutting down.")
+    S3.deinit()
+    S2.deinit()
+    S1.deinit()
+    exit()
+
 while True:
-    if not target==gettarget(): # Act only if there's been a change since last reading
-        target=gettarget() # Potentiometer positions list is taken to form the coordinates of the target
-        reqangles=calc(target)
-        move(S1,reqangles[0]) # Move the first servo to its target
-        move(S2,reqangles[1])
+    target=gettarget() # Potentiometer positions list is taken to form the coordinates of the target
+    if int(B1.value())==1:
+        log+=f"\n{gettime()}: Toggle signal detected"
+        toggle_wrist()
+    elif int(B2.value())==1:
+        log+=f"\n{gettime()}: Reset signal detected"
+        reset()
+    elif int(B3.value())==1:
+        log+=f"\n{gettime()}: Shutdown signal detected"
+        shutdown()
+    reqangles=calc(target)
+    move(S1,reqangles[0]) # Move the first servo to its target
+    move(S2,reqangles[1])
