@@ -50,10 +50,22 @@ def calc(target:list) -> list:
     end_position = math.sqrt(((shoulder_position[0] - end_position_x)**2.0) + (shoulder_position[1] - end_position_y)**2.0)
     xaxis_end_position = math.sqrt(((shoulder_position[0] - end_position_x)**2.0) + (end_position_y)**2.0)
     
-    angle_bac = math.acos(((La)**2 + (end_position)**2 - (Lb)**2)/(2*La*end_position)) # b = elbow; a = shoulder; c = wrist
+--- check out---
+cos_angle_bac = (La**2 + end_position**2 - Lb**2) / (2 * La * end_position)   # Calculate the cosine of angle BAC using the cosine rule
+cos_angle_bac = max(-1.0, min(1.0, cos_angle_bac)) # Keep the cosine value between -1 and 1 to avoid math domain errors
+angle_bac = math.acos(cos_angle_bac) # Calculate angle BAC in radians
+sin_angle_acb = (La * math.sin(angle_bac)) / Lb ## Calculate angle ACB using the sine rule
+sin_angle_acb = max(-1.0, min(1.0, sin_angle_acb))
+angle_acb = math.asin(sin_angle_acb)  # b = elbow; a = shoulder; c = wrist
+cos_angle_yac = (shoulder_position[1]**2 + end_position**2 - xaxis_end_position**2) / (2 * shoulder_position[1] * end_position) # Calculate angle YAC using the cosine rule
+cos_angle_yac = max(-1.0, min(1.0, cos_angle_yac)) # Keep the cosine value between -1 and 1
+angle_yac = math.acos(cos_angle_yac) # Calculate angle YAC in radians
+    
+--- the before one ---
+    angle_bac = math.acos(max(-1.0, min(1.0, cos_angle_bac)))
     angle_acb = math.asin(((La)*(math.sin(angle_bac)))/(Lb)) # b = elbow; a = shoulder; c = wrist
     angle_yac = math.acos(((shoulder_position[1])**2 + (end_position)**2 - (xaxis_end_position)**2)/(2*(shoulder_position[1])*(end_position))) # y = y-axis (vertical); a = shoulder; c = wrist
-    
+----vv----
     alpha = math.degrees(angle_bac) + math.degrees(angle_yac) # alpha = servo position of shoulder
     beta = math.degrees(angle_bac) + math.degrees(angle_acb) # beta = servo position of elbow
     
