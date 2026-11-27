@@ -86,8 +86,18 @@ def shutdown() -> None:
     S1.deinit()
     exit()
 
+log=""
+def printstatus(pots:list) -> None:
+    '''Print readings of all hardware inputs.'''
+    print("\x1b[2J\x1b[H",end="") # clear screen
+    print(f"\nPotentiometers: x{pots[0]} y{pots[1]}\n\
+Toggle btn:   {B1.value()}\n\
+Reset btn:    {B2.value()}\n\
+Shutdown btn: {B3.value()}")
+    print(log)
+    return
+
 while True:
-    target=gettarget() # Potentiometer positions list is taken to form the coordinates of the target
     if int(B1.value())==1:
         log+=f"\nToggle signal detected"
         toggle_wrist()
@@ -97,6 +107,8 @@ while True:
     elif int(B3.value())==1:
         log+=f"\nShutdown signal detected"
         shutdown()
+    target=gettarget() # Potentiometer positions list is taken to form the coordinates of the target
+    printstatus(target)
     reqangles=calc(target)
     move(S1,reqangles[0]) # Move the first servo to its target
     move(S2,reqangles[1])
