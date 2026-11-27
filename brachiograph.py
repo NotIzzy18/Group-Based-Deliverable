@@ -6,6 +6,8 @@ from time import sleep
 S1=PWM(Pin(0)) # Shoulder
 S2=PWM(Pin(1)) # Elbow
 S3=PWM(Pin(2)) # Wrist
+P1=ADC(Pin(27)) # Left potentiometer
+P2=ADC(Pin(26)) # and right
 B1=Pin(22) # Up/down toggle
 B2=Pin(13) # Reset to 0,0
 B3=Pin(12) # Shutdown
@@ -28,9 +30,8 @@ def move(servo:PWM,deg:int) -> None:
 
 def gettarget() -> list:
     '''Turn the potentiometers' positions into useable xy coordinartes by filtering out noise.'''
-    raw=[ADC(Pin(27)),ADC(Pin(26))] # [left,right]
-    # TODO: Filter out noise: min is 384, max is 65535
-    return raw
+    # TODO: Filter out noise to eliminate jitter. Min is 288, max is 65535.
+    return [P1.read_u16(),P2.read_u16()]
 
 def calc(target:list) -> list:
     '''Calculate the servo angles required the reach the target (arg1).'''
